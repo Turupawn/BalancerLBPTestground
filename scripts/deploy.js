@@ -8,6 +8,10 @@ const hre = require("hardhat");
 
 async function main() {
   [deployer, user1, user2] = await ethers.getSigners();
+  const blockNumBefore = await ethers.provider.getBlockNumber();
+  const blockBefore = await ethers.provider.getBlock(blockNumBefore);
+  timestamp = blockBefore.timestamp;
+
   const DummyToken = await hre.ethers.getContractFactory("DummyToken");
   const PresaleFactory = await hre.ethers.getContractFactory("PresaleFactory");
 
@@ -16,28 +20,36 @@ async function main() {
   );;
 
   const presaleFactory = await PresaleFactory.deploy();
-  
+
   const tokenA = await DummyToken.deploy("Token A", "TKNA");
   const tokenB = await DummyToken.deploy("Token B", "TKNB");
-  
+
   //await tokenA.approve(lbpFactory.address, ethers.utils.parseEther("100"))
   //await tokenB.approve(lbpFactory.address, ethers.utils.parseEther("100"))
+  tokens = [tokenA.address, tokenB.address]
+  if(tokenB.address < tokenA.address)
+    tokens = [tokenB.address, tokenA.address]
   await presaleFactory.create(
     "My LBP",
     "MLBP",
-    [tokenA.address, tokenB.address]/*tokens*/,
+    tokens/*tokens*/,
     [ethers.utils.parseEther("0.5"), ethers.utils.parseEther("0.5")] /*weights*/,
     ethers.utils.parseEther("0.1") /*swapFeePercentage*/,
     deployer.address/*owner*/,
     true /*swapEnabledOnStart*/
   )
-  console.log(await presaleFactory.lbpPoolAddress())
 
   const lbp = await hre.ethers.getContractAt(
-    "contracts/DummyToken.sol:IERC20", await presaleFactory.lbpPoolAddress()
+    "ILiquidityBootstrappingPool", await presaleFactory.lbpPoolAddress()
   );
+  lbp.updateWeightsGradually(
+    timestamp + 10 /*startTime*/,
+    timestamp + 100 /*endTime*/,
+    [ethers.utils.parseEther("0.4"), ethers.utils.parseEther("0.6")] /*endWeights*/
+  )
 
-  console.log(await lbp.balanceOf(deployer.address))
+
+  //console.log(await lbp.balanceOf(deployer.address))
 }
 
 // We recommend this pattern to be able to use async/await everywhere
