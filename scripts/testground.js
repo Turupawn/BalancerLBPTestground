@@ -50,8 +50,6 @@ async function main() {
   console.log("Now we add liquidity by joining the pool")
   await tokenA.approve(vault.address, ethers.utils.parseEther("100"))
   await tokenB.approve(vault.address, ethers.utils.parseEther("100"))
-  await tokenA.approve(lbp.address, ethers.utils.parseEther("100"))
-  await tokenB.approve(lbp.address, ethers.utils.parseEther("100"))
 
   const JOIN_KIND_INIT = 0;
   const initialBalances = [ethers.utils.parseEther("10"),ethers.utils.parseEther("10")]
@@ -107,6 +105,7 @@ async function main() {
 
   console.log("A pool balance: " + ethers.utils.formatEther(await tokenA.balanceOf(vault.address)))
   console.log("B pool balance: " + ethers.utils.formatEther(await tokenB.balanceOf(vault.address)))
+  console.log("LPB: " + ethers.utils.formatEther(await lbp.balanceOf(deployer.address)))
 }
 
 // We recommend this pattern to be able to use async/await everywhere
