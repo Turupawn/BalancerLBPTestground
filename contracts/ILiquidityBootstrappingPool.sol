@@ -8,4 +8,6 @@ interface ILiquidityBootstrappingPool
         uint256 endTime,
         uint256[] memory endWeights
     ) external;
+
+    function getPoolId() external view returns (bytes32);
 }
